@@ -1,0 +1,21 @@
+{% extends 'restaurant_app/base.html' %}
+{% block title %}{% if lookup_only %}Track an Order{% else %}Order #{{ order.id }}{% endif %} | Saffron & Stone{% endblock %}
+{% block content %}
+<section class="container page-section narrow-section">
+{% if lookup_only %}
+  <div class="page-intro"><span class="eyebrow">YOUR ORDER, YOUR TIME</span><h1>Track your <em>order.</em></h1><p class="muted">Enter the order number from your confirmation page.</p></div>
+  <div class="panel-card lookup-card"><form method="post">{% csrf_token %}<label class="form-label" for="order_id">Order ID</label><div class="input-group input-group-lg"><input class="form-control" id="order_id" name="order_id" type="number" min="1" required placeholder="e.g. 104"><button class="btn btn-lime" type="submit">Track</button></div></form></div>
+{% else %}
+  <div class="page-intro"><span class="eyebrow">ORDER CONFIRMATION</span><h1>Thanks, {{ order.customer_name|escape }}.</h1><p class="muted">Your order is in good hands. Here is the latest kitchen status.</p></div>
+  <div class="track-card">
+    <div class="track-top"><div><span class="muted small-label">ORDER NUMBER</span><h2>#{{ order.id }}</h2></div><span class="status-pill status-{{ order.status|lower }}">{{ order.status }}</span></div>
+    <div class="track-meta"><span><i class="bi bi-geo-alt me-2"></i>Table {{ order.table_number }}</span><span><i class="bi bi-clock me-2"></i>{{ order.created_at|date:"M j, Y · g:i A" }}</span></div>
+    <div class="progress-track">
+      {% for step in steps %}<div class="progress-step {% if forloop.counter0 <= current_step %}done{% endif %}"><span class="step-dot">{% if forloop.counter0 < current_step %}<i class="bi bi-check-lg"></i>{% else %}{{ forloop.counter }}{% endif %}</span><span>{{ step }}</span></div>{% endfor %}
+    </div>
+    <div class="track-items"><h3>What you ordered</h3>{% for line in order.items.all %}<div class="summary-row"><span>{{ line.quantity }} × {{ line.menu_item.name }}</span><strong>₹{{ line.line_total|floatformat:2 }}</strong></div>{% endfor %}<div class="summary-row summary-total"><span>Total paid at checkout</span><strong>₹{{ order.total_amount|floatformat:2 }}</strong></div></div>
+    <p class="track-refresh"><i class="bi bi-info-circle me-2"></i>This page does not auto-refresh. Reload to see status updates.</p><div class="d-flex flex-wrap gap-2"><a class="btn btn-lime" href="{% url 'restaurant_app:order_track' order.id %}"><i class="bi bi-arrow-clockwise me-2"></i>Refresh status</a><a class="btn btn-outline-dark" href="{% url 'restaurant_app:menu' %}">Order more</a></div>
+  </div>
+{% endif %}
+</section>
+{% endblock %}

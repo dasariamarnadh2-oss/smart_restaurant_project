@@ -1,0 +1,45 @@
+{% extends 'restaurant_app/base.html' %}
+{% block title %}Your Cart | Saffron & Stone{% endblock %}
+{% block content %}
+<section class="container page-section">
+  <div class="page-intro"><span class="eyebrow">ALMOST THERE</span><h1>Your <em>basket.</em></h1><p class="muted">Review your dishes before sending them to our kitchen.</p></div>
+  {% if items %}
+  <div class="row g-4 align-items-start">
+    <div class="col-lg-7">
+      <div class="panel-card">
+        {% for row in items %}
+        <div class="cart-line">
+          <div class="cart-thumb">{% if row.item.image_url %}<img src="{{ row.item.image_url }}" alt="{{ row.item.name }}">{% else %}<i class="bi bi-egg-fried"></i>{% endif %}</div>
+          <div class="cart-item-main"><h3>{{ row.item.name }}</h3><span>₹{{ row.item.price|floatformat:2 }} each</span>
+            <form method="post" action="{% url 'restaurant_app:update_cart' row.item.id %}" class="quantity-form mt-2">{% csrf_token %}<label class="visually-hidden" for="quantity-{{ row.item.id }}">Quantity</label><input id="quantity-{{ row.item.id }}" class="form-control quantity-input" type="number" name="quantity" min="1" max="50" value="{{ row.quantity }}"><button class="btn btn-sm btn-outline-dark" type="submit">Update</button></form>
+          </div>
+          <div class="cart-line-end"><strong>₹{{ row.line_total|floatformat:2 }}</strong><form method="post" action="{% url 'restaurant_app:remove_from_cart' row.item.id %}">{% csrf_token %}<button class="remove-btn" type="submit" aria-label="Remove {{ row.item.name }}"><i class="bi bi-trash3"></i></button></form></div>
+        </div>
+        {% endfor %}
+        <a href="{% url 'restaurant_app:menu' %}" class="continue-link"><i class="bi bi-arrow-left me-2"></i>Continue browsing</a>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="summary-card">
+        <h2>Order summary</h2>
+        <div class="summary-row"><span>Subtotal</span><strong>₹{{ subtotal|floatformat:2 }}</strong></div>
+        <div class="summary-row"><span>Tax (5%)</span><strong>₹{{ tax|floatformat:2 }}</strong></div>
+        <div class="summary-row summary-total"><span>Total</span><strong>₹{{ grand_total|floatformat:2 }}</strong></div>
+        <p class="summary-note"><i class="bi bi-shield-check me-2"></i>Final totals are verified securely on the server.</p>
+        <hr>
+        <h3 class="checkout-heading">Where should we bring it?</h3>
+        <form method="post" action="{% url 'restaurant_app:checkout' %}" id="checkout-form">
+          {% csrf_token %}
+          {% if checkout_form.non_field_errors %}<div class="alert alert-danger">{{ checkout_form.non_field_errors }}</div>{% endif %}
+          <div class="mb-3"><label class="form-label" for="{{ checkout_form.customer_name.id_for_label }}">Name</label>{{ checkout_form.customer_name }}{% for error in checkout_form.customer_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+          <div class="mb-3"><label class="form-label" for="{{ checkout_form.table_number.id_for_label }}">Table number</label>{{ checkout_form.table_number }}{% for error in checkout_form.table_number.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+          <button class="btn btn-lime btn-lg w-100" type="submit">Place order <i class="bi bi-arrow-right ms-2"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="bi bi-bag"></i><h2>Your cart is waiting for something delicious.</h2><p>Add a dish from the menu and it will appear here.</p><a class="btn btn-lime" href="{% url 'restaurant_app:menu' %}">Browse menu</a></div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10251e">
+  <title>{% block title %}Saffron & Stone | Restaurant{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark site-nav sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'restaurant_app:menu' %}"><span class="brand-mark"><i class="bi bi-flower1"></i></span> Saffron <span class="brand-light">& Stone</span></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <a class="nav-link" href="{% url 'restaurant_app:menu' %}">Menu</a>
+        <a class="nav-link" href="{% url 'restaurant_app:track_lookup' %}">Track order</a>
+        {% if user.is_authenticated and user.is_staff %}<a class="nav-link" href="{% url 'restaurant_app:kitchen_dashboard' %}">Kitchen</a>{% endif %}
+        <a class="btn btn-lime nav-cart" href="{% url 'restaurant_app:cart' %}"><i class="bi bi-bag me-1"></i> My cart</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<main>
+  <div class="container pt-3" aria-live="polite">
+    {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>{% endfor %}{% endif %}
+  </div>
+  {% block content %}{% endblock %}
+</main>
+<footer class="site-footer mt-5"><div class="container d-flex flex-column flex-md-row justify-content-between gap-2"><span>© {% now "Y" %} Saffron & Stone</span><span>Freshly prepared. Thoughtfully served.</span></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/cart.js' %}" defer></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends 'restaurant_app/base.html' %}
+{% block title %}Menu | Saffron & Stone{% endblock %}
+{% block content %}
+<section class="hero-section">
+  <div class="container hero-content">
+    <div class="hero-copy">
+      <span class="eyebrow"><i class="bi bi-stars me-2"></i>GOOD FOOD, GOOD MOOD</span>
+      <h1>Made with care.<br><em>Served with soul.</em></h1>
+      <p>Explore seasonal favourites, fresh ingredients and little moments worth slowing down for.</p>
+      <a href="#our-menu" class="btn btn-lime btn-lg mt-2">Explore the menu <i class="bi bi-arrow-down-right ms-2"></i></a>
+    </div>
+    <div class="hero-art" aria-hidden="true"><div class="hero-circle"><i class="bi bi-egg-fried"></i></div><span class="art-note note-one">Fresh daily</span><span class="art-note note-two">Made for you</span><div class="hero-orbit"></div></div>
+  </div>
+</section>
+<section class="container menu-section" id="our-menu">
+  <div class="section-heading d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3">
+    <div><span class="eyebrow">OUR KITCHEN</span><h2>Find your <em>favourite.</em></h2><p class="muted mb-0">A little something for every appetite.</p></div>
+    <form method="get" class="filter-form d-flex flex-wrap gap-2 align-items-center">
+      <select class="form-select" name="category" aria-label="Filter by category">
+        <option value="">All categories</option>
+        {% for category in categories %}<option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>{{ category.name }}</option>{% endfor %}
+      </select>
+      <label class="form-check vegetarian-filter"><input class="form-check-input" type="checkbox" name="vegetarian" value="1" {% if vegetarian_only %}checked{% endif %} onchange="this.form.submit()"> <span>Vegetarian</span></label>
+      <button class="btn btn-outline-dark" type="submit">Filter</button>
+    </form>
+  </div>
+  {% for category, items in grouped_items %}
+  <div class="category-block">
+    <div class="category-title"><span class="category-icon"><i class="{{ category.icon|default:'bi bi-grid' }}"></i></span><h3>{{ category.name }}</h3><span class="category-line"></span><span class="category-count">{{ items|length }} items</span></div>
+    <div class="row g-4">
+      {% for item in items %}
+      <div class="col-sm-6 col-lg-4 col-xl-3">
+        <article class="food-card h-100">
+          <div class="food-image-wrap">
+            {% if item.image_url %}<img class="food-image" src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy" referrerpolicy="no-referrer">{% else %}<div class="food-placeholder"><i class="bi bi-egg-fried"></i></div>{% endif %}
+            <span class="diet-badge {% if item.is_vegetarian %}veg{% else %}nonveg{% endif %}"><span></span>{% if item.is_vegetarian %}Vegetarian{% else %}Non-veg{% endif %}</span>
+          </div>
+          <div class="food-card-body">
+            <div class="d-flex justify-content-between align-items-start gap-2"><h4>{{ item.name }}</h4><span class="food-price">₹{{ item.price|floatformat:2 }}</span></div>
+            <p>{{ item.description|default:"Freshly prepared by our kitchen team." }}</p>
+            <form method="post" action="{% url 'restaurant_app:add_to_cart' item.id %}" class="add-form">
+              {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-add w-100" type="submit"><i class="bi bi-plus-lg me-2"></i>Add to cart</button>
+            </form>
+          </div>
+        </article>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state"><i class="bi bi-search"></i><h3>No dishes found</h3><p>Try another category or clear the vegetarian filter.</p><a class="btn btn-outline-dark" href="{% url 'restaurant_app:menu' %}">Clear filters</a></div>
+  {% endfor %}
+</section>
+{% endblock %}

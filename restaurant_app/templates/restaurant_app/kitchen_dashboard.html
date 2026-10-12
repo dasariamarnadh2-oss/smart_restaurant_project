@@ -1,0 +1,24 @@
+{% extends 'restaurant_app/base.html' %}
+{% block title %}Kitchen Dashboard | Saffron & Stone{% endblock %}
+{% block content %}
+<section class="container page-section">
+  <div class="page-intro d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3"><div><span class="eyebrow">BACK OF HOUSE</span><h1>Kitchen <em>dashboard.</em></h1><p class="muted">Keep every order moving, one step at a time.</p></div><span class="staff-tag"><i class="bi bi-shield-lock me-2"></i>Staff access</span></div>
+  {% regroup orders by status as status_groups %}
+  <div class="kitchen-columns">
+    {% for status in "Received,Preparing,Ready,Completed"|cut:" "|make_list %}{% endfor %}
+    <div class="row g-3">
+      {% for order in orders %}
+      <div class="col-md-6 col-xl-4">
+        <article class="kitchen-order">
+          <div class="kitchen-order-head"><div><span class="muted small-label">ORDER #{{ order.id }}</span><h2>{{ order.customer_name }}</h2></div><span class="status-pill status-{{ order.status|lower }}">{{ order.status }}</span></div>
+          <div class="kitchen-meta"><span><i class="bi bi-geo-alt me-1"></i>Table {{ order.table_number }}</span><span>{{ order.created_at|date:"g:i A" }}</span></div>
+          <ul class="kitchen-items">{% for line in order.items.all %}<li><span><b>{{ line.quantity }}×</b> {{ line.menu_item.name }}</span><span>₹{{ line.line_total|floatformat:2 }}</span></li>{% endfor %}</ul>
+          <div class="kitchen-total"><span>Order total</span><strong>₹{{ order.total_amount|floatformat:2 }}</strong></div>
+          <form method="post" action="{% url 'restaurant_app:update_order_status' order.id %}" class="kitchen-update">{% csrf_token %}<label class="visually-hidden" for="status-{{ order.id }}">Update status</label><select class="form-select" name="status" id="status-{{ order.id }}">{% for value, label in status_form.fields.status.choices %}<option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="btn btn-dark" type="submit">Update</button></form>
+        </article>
+      </div>
+      {% empty %}<div class="col-12"><div class="empty-state"><i class="bi bi-clipboard2-check"></i><h3>No orders yet</h3><p>New customer orders will appear here.</p></div></div>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
