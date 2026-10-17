@@ -4,7 +4,7 @@ services:
     runtime: python
     rootDir: .
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
-    startCommand: gunicorn restaurant_project.wsgi:application
+    startCommand: python manage.py migrate && python manage.py seed_menu && python manage.py ensure_admin && gunicorn restaurant_project.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
@@ -14,3 +14,7 @@ services:
         generateValue: true
       - key: DEBUG
         value: "False"
+      - key: DJANGO_ADMIN_USERNAME
+        value: admin
+      - key: DJANGO_ADMIN_PASSWORD
+        sync: false
